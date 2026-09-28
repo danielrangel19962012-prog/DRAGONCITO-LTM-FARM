@@ -1,0 +1,226 @@
+-- Script Name: Dragoncito LTM
+-- Tipo: LocalScript en StarterGui
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Variables de Estado
+local isMinimized = false
+local boundsEnabled = false
+local boundsFolder = nil
+
+-- Crear ScreenGui principal
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "DragoncitoLTM_Gui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+-- Marco Principal
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 260, 0, 220)
+mainFrame.Position = UDim2.new(0.5, -130, 0.4, -110)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 10)
+frameCorner.Parent = mainFrame
+
+-- Barra de Título
+local titleBar = Instance.new("Frame")
+titleBar.Name = "TitleBar"
+titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 10)
+titleCorner.Parent = titleBar
+
+local titleText = Instance.new("TextLabel")
+titleText.Size = UDim2.new(1, -40, 1, 0)
+titleText.Position = UDim2.new(0, 10, 0, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = "Dragoncito LTM"
+titleText.TextColor3 = Color3.fromRGB(255, 170, 0)
+titleText.TextSize = 16
+titleText.Font = Enum.Font.SourceSansBold
+titleText.TextXAlignment = Enum.TextXAlignment.Left
+titleText.Parent = titleBar
+
+-- Botón Minimizar
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
+minimizeBtn.Position = UDim2.new(1, -30, 0, 5)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+minimizeBtn.Text = "-"
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.TextSize = 18
+minimizeBtn.Font = Enum.Font.SourceSansBold
+minimizeBtn.Parent = titleBar
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 5)
+minCorner.Parent = minimizeBtn
+
+-- Contenedor de Contenido
+local contentFrame = Instance.new("Frame")
+contentFrame.Name = "ContentFrame"
+contentFrame.Size = UDim2.new(1, 0, 1, -35)
+contentFrame.Position = UDim2.new(0, 0, 0, 35)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainFrame
+
+-- Indicador de Gravedad Actual
+local gravityLabel = Instance.new("TextLabel")
+gravityLabel.Size = UDim2.new(1, -20, 0, 25)
+gravityLabel.Position = UDim2.new(0, 10, 0, 5)
+gravityLabel.BackgroundTransparency = 1
+gravityLabel.Text = "Gravedad Actual: " .. tostring(Workspace.Gravity)
+gravityLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+gravityLabel.TextSize = 14
+gravityLabel.Font = Enum.Font.SourceSans
+gravityLabel.Parent = contentFrame
+
+-- Botones de Ajuste Rápido de Gravedad
+local btnBajar = Instance.new("TextButton")
+btnBajar.Size = UDim2.new(0, 110, 0, 30)
+btnBajar.Position = UDim2.new(0, 15, 0, 35)
+btnBajar.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+btnBajar.Text = "Bajar (-50)"
+btnBajar.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnBajar.TextSize = 14
+btnBajar.Font = Enum.Font.SourceSansBold
+btnBajar.Parent = contentFrame
+
+local btnSubir = Instance.new("TextButton")
+btnSubir.Size = UDim2.new(0, 110, 0, 30)
+btnSubir.Position = UDim2.new(0, 135, 0, 35)
+btnSubir.BackgroundColor3 = Color3.fromRGB(50, 180, 50)
+btnSubir.Text = "Subir (+50)"
+btnSubir.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnSubir.TextSize = 14
+btnSubir.Font = Enum.Font.SourceSansBold
+btnSubir.Parent = contentFrame
+
+local btnReset = Instance.new("TextButton")
+btnReset.Size = UDim2.new(0, 230, 0, 30)
+btnReset.Position = UDim2.new(0, 15, 0, 72)
+btnReset.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
+btnReset.Text = "Restablecer Normal (196.2)"
+btnReset.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnReset.TextSize = 14
+btnReset.Font = Enum.Font.SourceSansBold
+btnReset.Parent = contentFrame
+
+-- Botón Paredes Ajustadas
+local btnBounds = Instance.new("TextButton")
+btnBounds.Size = UDim2.new(0, 230, 0, 35)
+btnBounds.Position = UDim2.new(0, 15, 0, 110)
+btnBounds.BackgroundColor3 = Color3.fromRGB(100, 50, 50)
+btnBounds.Text = "Jaula Trampolín: DESACTIVADO"
+btnBounds.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnBounds.TextSize = 12
+btnBounds.Font = Enum.Font.SourceSansBold
+btnBounds.Parent = contentFrame
+
+-- Redondear botones
+for _, btn in ipairs({btnBajar, btnSubir, btnReset, btnBounds}) do
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 6)
+	c.Parent = btn
+end
+
+-- Lógica de Funciones
+local function setGravity(val)
+	val = math.clamp(val, 0, 1000)
+	Workspace.Gravity = val
+	gravityLabel.Text = "Gravedad Actual: " .. math.floor(val)
+end
+
+-- Función para crear una pared invisible
+local function createWall(name, size, cframe)
+	local wall = Instance.new("Part")
+	wall.Name = name
+	wall.Size = size
+	wall.CFrame = cframe
+	wall.Transparency = 1 -- Totalmente invisible
+	wall.Anchored = true
+	wall.CanCollide = true
+	wall.Parent = boundsFolder
+	return wall
+end
+
+local function toggleTrampolineBounds()
+	boundsEnabled = not boundsEnabled
+	
+	if boundsEnabled then
+		btnBounds.Text = "Jaula Trampolín: ACTIVADO"
+		btnBounds.BackgroundColor3 = Color3.fromRGB(50, 150, 80)
+		
+		local char = player.Character or player.CharacterAdded:Wait()
+		local root = char:FindFirstChild("HumanoidRootPart")
+		
+		if root then
+			boundsFolder = Instance.new("Folder")
+			boundsFolder.Name = "DragoncitoLTM_Bounds"
+			boundsFolder.Parent = Workspace
+			
+			local pos = root.Position
+			-- Ajuste preciso para el tamaño del trampolín de la foto:
+			local size = 12  -- Ajustado justo al borde del trampolín
+			local height = 150 -- Altura máxima del rebote
+			
+			-- Techo
+			createWall("Ceiling", Vector3.new(size, 2, size), CFrame.new(pos + Vector3.new(0, height, 0)))
+			-- Paredes laterales ajustadas
+			createWall("WallNorth", Vector3.new(size, height, 1), CFrame.new(pos + Vector3.new(0, height/2, size/2)))
+			createWall("WallSouth", Vector3.new(size, height, 1), CFrame.new(pos + Vector3.new(0, height/2, -size/2)))
+			createWall("WallEast", Vector3.new(1, height, size), CFrame.new(pos + Vector3.new(size/2, height/2, 0)))
+			createWall("WallWest", Vector3.new(1, height, size), CFrame.new(pos + Vector3.new(-size/2, height/2, 0)))
+		end
+	else
+		btnBounds.Text = "Jaula Trampolín: DESACTIVADO"
+		btnBounds.BackgroundColor3 = Color3.fromRGB(100, 50, 50)
+		if boundsFolder then
+			boundsFolder:Destroy()
+			boundsFolder = nil
+		end
+	end
+end
+
+-- Eventos
+minimizeBtn.MouseButton1Click:Connect(function()
+	isMinimized = not isMinimized
+	if isMinimized then
+		contentFrame.Visible = false
+		mainFrame.Size = UDim2.new(0, 260, 0, 35)
+		minimizeBtn.Text = "+"
+	else
+		contentFrame.Visible = true
+		mainFrame.Size = UDim2.new(0, 260, 0, 220)
+		minimizeBtn.Text = "-"
+	end
+end)
+
+btnBajar.MouseButton1Click:Connect(function()
+	setGravity(Workspace.Gravity - 50)
+end)
+
+btnSubir.MouseButton1Click:Connect(function()
+	setGravity(Workspace.Gravity + 50)
+end)
+
+btnReset.MouseButton1Click:Connect(function()
+	setGravity(196.2)
+end)
+
+btnBounds.MouseButton1Click:Connect(toggleTrampolineBounds)
